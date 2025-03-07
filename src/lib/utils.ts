@@ -14,3 +14,11 @@ export async function readFile() {
   const data = JSON.parse(file) as unknown as Recipe[]
   return data
 }
+
+export const debounce = (func: (...args: string[]) => void, wait: number) => {
+  let timeout: NodeJS.Timeout;
+  return (...args: string[]) => {
+    clearTimeout(timeout);
+    timeout = setTimeout(() => func(...args), wait);
+  };
+};

@@ -3,6 +3,12 @@
 import type { NextApiRequest, NextApiResponse } from "next";
 import { addRecipe, getRecipies, RecipeResponses, removeRecipe, updateRecipe } from './recipe.service';
 
+export const config = {
+  api: {
+    bodyParser: false, // Disable bodyParser to handle large files
+  },
+};
+
 export default async function handler(
   req: NextApiRequest,
   res: NextApiResponse<RecipeResponses>,

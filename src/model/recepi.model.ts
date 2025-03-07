@@ -1,9 +1,11 @@
 export interface Recipe {
   id: number;
-  imagePath: string;
+  name: 'John doe'
+  imageName: string;
   email: string;
   title: string;
   instructions: string;
-  dateAdded: Date;
-  isFavorite: boolean
+  favorite: boolean
+  createdAt: Date;
+  updatedAt: Date;
 }
