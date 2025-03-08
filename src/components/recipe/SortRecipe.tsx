@@ -10,17 +10,18 @@ const SortRecipe = () => {
   const handleChange = (e: string) => {
     const sortedData = [...(data ?? [])].sort((a, b) => {
       if (e === "asc") {
-        return new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime()
-      } else {
-        return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+        return a.title.localeCompare(b.title)
+      } else if (e === "dsc") {
+        return b.title.localeCompare(a.title)
       }
+      return 0
     })
     dispatch(RecipeSlice.actions.sortRecipe(sortedData))
   }
   return (
     <Select onValueChange={handleChange}>
       <SelectTrigger className="w-full">
-        <SelectValue placeholder="Select a recipe" />
+        <SelectValue defaultValue="asc" placeholder="Select a recipe" />
       </SelectTrigger>
       <SelectContent>
         <SelectGroup>

@@ -17,7 +17,7 @@ import { Input } from "@/components/ui/input"
 import { Textarea } from "./ui/textarea"
 import Image from "next/image"
 import { addRecipe, removeRecipe, updateRecipe } from "@/redux/recipe/recipe.slice"
-import { useAppDispatch, useAppSelectore } from "@/redux/store"
+import { useAppDispatch } from "@/redux/store"
 import { Recipe } from "@/model/recepi.model"
 import { toast } from "sonner"
 import { useRouter } from "next/router"
@@ -52,8 +52,6 @@ const RecipeForm = ({ type, payload }: IRecipeForm) => {
   const dispatch = useAppDispatch()
   const router = useRouter()
 
-  const { message, hasError } = useAppSelectore(({ recipe }) => recipe)
-
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
@@ -74,31 +72,33 @@ const RecipeForm = ({ type, payload }: IRecipeForm) => {
     formData.append('id', (id ?? 0).toString())
 
     if (type === 'ADD') {
-      dispatch(addRecipe(formData))
-      if (hasError) {
-        toast.error(message)
-        return
-      }
-      toast.success(message)
+      dispatch(addRecipe(formData)).then(({ meta, payload }) => {
+        if (meta.requestStatus === "rejected") {
+          toast.error(payload.message)
+          return
+        }
+        toast.success(payload.message)
+      })
+
+      form.reset({
+        name: '',
+        imageName: undefined,
+        title: '',
+        email: '',
+        instructions: '',
+        id: 0
+      })
     }
     if (type === "UPDATE") {
-      dispatch(updateRecipe(formData as unknown as Recipe))
-      if (hasError) {
-        toast.error(message)
-        return
-      }
-      toast.success(message)
-      router.push('/')
+      dispatch(updateRecipe(formData as unknown as Recipe)).then(({ meta, payload }) => {
+        if (meta.requestStatus === "rejected") {
+          toast.error(payload.message)
+          return
+        }
+        toast.success(payload.message)
+        router.push('/')
+      })
     }
-
-    form.reset({
-      name: '',
-      imageName: undefined,
-      title: '',
-      email: '',
-      instructions: '',
-      id: 0
-    })
 
   }
 

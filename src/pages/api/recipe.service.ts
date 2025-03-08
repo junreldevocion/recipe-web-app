@@ -15,7 +15,11 @@ export type RecipeResponses = {
 export const getRecipies = async (res: NextApiResponse<RecipeResponses>) => {
   try {
     const data = await readFile()
-    res.status(200).json({ data });
+
+    const sortedData = [...(data ?? [])].sort((a, b) => {
+      return a.title.localeCompare(b.title)
+    })
+    res.status(200).json({ data: sortedData });
   } catch (error) {
     res.status(500).json({ error });
   }

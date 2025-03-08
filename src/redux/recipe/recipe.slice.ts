@@ -104,8 +104,9 @@ export const RecipeSlice = createSlice({
       .addCase(updateRecipe.pending, (state) => {
         state.loading = true
       }).addCase(updateRecipe.fulfilled, (state, action) => {
-        state.loading = false;
+        state.loading = false
         state.data = action.payload.data
+        state.message = action.payload.message
       })
       .addCase(updateRecipe.rejected, (state, action) => {
         state.loading = false;
@@ -129,7 +130,6 @@ export const RecipeSlice = createSlice({
       .addCase(addRecipe.pending, (state) => {
         state.loading = true
       }).addCase(addRecipe.fulfilled, (state, action) => {
-        console.log(action, 'action')
         state.loading = false
         state.data = action.payload.data
         state.message = action.payload.message

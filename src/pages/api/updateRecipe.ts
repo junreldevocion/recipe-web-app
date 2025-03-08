@@ -36,6 +36,8 @@ export default function handler(
 
   form.parse(req, async (err, fields, files) => {
 
+
+
     if (err) {
       return res.status(500).json({ message: 'Error parsing the files' });
     }
@@ -57,6 +59,10 @@ export default function handler(
       email: fields?.email?.[0],
       instructions: fields?.instructions?.[0],
       imageUrl: fileName
+    }
+
+    if (!extractFields.name || !extractFields.email || !extractFields.imageUrl || !extractFields.instructions || !extractFields.title) {
+      return res.status(400).json({ message: 'Missing fields', error: 'Missing fields' });
     }
 
     fs.rename(file.filepath, filePath, async (err) => {
