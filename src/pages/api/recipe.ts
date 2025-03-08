@@ -1,13 +1,8 @@
 
 
 import type { NextApiRequest, NextApiResponse } from "next";
-import { addRecipe, getRecipies, RecipeResponses, removeRecipe, updateRecipe } from './recipe.service';
+import { getRecipies, RecipeResponses, removeRecipe } from './recipe.service';
 
-export const config = {
-  api: {
-    bodyParser: false, // Disable bodyParser to handle large files
-  },
-};
 
 export default async function handler(
   req: NextApiRequest,
@@ -18,16 +13,8 @@ export default async function handler(
     await getRecipies(res)
   }
 
-  if (req.method === 'POST') {
-    await addRecipe(req, res)
-  }
-
   if (req.method === 'DELETE') {
     await removeRecipe(req, res)
-  }
-
-  if (req.method === 'PUT') {
-    await updateRecipe(req, res)
   }
 
 }

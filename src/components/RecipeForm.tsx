@@ -16,23 +16,25 @@ import {
 import { Input } from "@/components/ui/input"
 import { Textarea } from "./ui/textarea"
 import Image from "next/image"
-import { addRecipe } from "@/redux/recipe/recipe.slice"
-import { useAppDispatch } from "@/redux/store"
+import { addRecipe, removeRecipe, updateRecipe } from "@/redux/recipe/recipe.slice"
+import { useAppDispatch, useAppSelectore } from "@/redux/store"
+import { Recipe } from "@/model/recepi.model"
+import { toast } from "sonner"
+import { useRouter } from "next/router"
 const ACCEPTED_IMAGE_TYPES = ["image/jpeg", "image/jpg", "image/png", "image/webp"];
 
 
 export const formSchema = z.object({
-  name: z.string().min(1, {
-    message: "Username is required",
-  }),
-  email: z.string().min(1, { message: 'Email is required' }).email('This is not a valid email'),
-  title: z.string().min(1, {
+  id: z.number().optional(),
+  name: z.string({ required_error: "Name is required", invalid_type_error: "Name must be a string" }).min(2, { message: 'Name must be at least 2 chars' }),
+  email: z.string({ required_error: "Email is required" }).min(5, { message: 'Email must be atleast 5 chars' }).email('This is not a valid email'),
+  title: z.string({ required_error: "Title is required" }).min(1, {
     message: 'Title is required'
   }),
-  instructions: z.string().min(1, {
+  instructions: z.string({ required_error: "instructions is required" }).min(1, {
     message: 'instructions is required'
   }),
-  image: z.instanceof(File, {
+  imageName: z.instanceof(File, {
     message: 'Please select an image file'
   }).refine((file) => ACCEPTED_IMAGE_TYPES.includes(file.type), {
     message: 'Please upload a valid image file (JPEG, PNG).'
@@ -42,25 +44,70 @@ export const formSchema = z.object({
 
 interface IRecipeForm {
   type: 'ADD' | 'UPDATE',
-  payload?: z.infer<typeof formSchema>
+  payload?: Recipe
 }
 
 const RecipeForm = ({ type, payload }: IRecipeForm) => {
 
   const dispatch = useAppDispatch()
+  const router = useRouter()
+
+  const { message, hasError } = useAppSelectore(({ recipe }) => recipe)
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
-      ...payload
+      ...payload as unknown as z.infer<typeof formSchema>,
+      id: payload?.id ?? 0,
     },
   })
 
-
   function onSubmit(values: z.infer<typeof formSchema>) {
-    console.log(values, 'values')
+    const { imageName, title, name, email, instructions, id } = values
+
+    const formData = new FormData()
+    formData.append('file', imageName as File)
+    formData.append('title', title)
+    formData.append('name', name)
+    formData.append('email', email)
+    formData.append('instructions', instructions)
+    formData.append('id', (id ?? 0).toString())
+
     if (type === 'ADD') {
-      dispatch(addRecipe(values))
+      dispatch(addRecipe(formData))
+      if (hasError) {
+        toast.error(message)
+        return
+      }
+      toast.success(message)
+    }
+    if (type === "UPDATE") {
+      dispatch(updateRecipe(formData as unknown as Recipe))
+      if (hasError) {
+        toast.error(message)
+        return
+      }
+      toast.success(message)
+      router.push('/')
+    }
+
+    form.reset({
+      name: '',
+      imageName: undefined,
+      title: '',
+      email: '',
+      instructions: '',
+      id: 0
+    })
+
+  }
+
+  const handleDelte = async () => {
+    const resultAction = (await dispatch(removeRecipe({ id: payload?.id as number }))).payload
+    const message = resultAction?.message
+    if (resultAction) {
+      toast.success(message)
+      router.push('/')
     }
   }
 
@@ -70,15 +117,13 @@ const RecipeForm = ({ type, payload }: IRecipeForm) => {
         <div>
           <FormField
             control={form.control}
-            name="image"
+            name="imageName"
             render={({ field }) => {
               const { value } = field
 
               let imageUrl = '/placeholder-image.jpg'
               if (typeof value == 'object') {
                 imageUrl = URL.createObjectURL(value)
-              } else if (value) {
-                imageUrl = `/recipe/${value}`
               }
 
               return (
@@ -89,9 +134,10 @@ const RecipeForm = ({ type, payload }: IRecipeForm) => {
                         <Image
                           src={imageUrl}
                           alt="Image preview"
-                          className="min-w-[300px] max-w-[300px] min-h-[200px] max-h-[200px]  object-cover"
-                          width={300}
-                          height={300}
+                          className="min-w-[250px] max-w-[250px] min-h-[200px] max-h-[200px]"
+                          width={250}
+                          height={250}
+                          unoptimized
                         />
                       </label>
                       <Input
@@ -115,7 +161,7 @@ const RecipeForm = ({ type, payload }: IRecipeForm) => {
               <FormItem>
                 <FormLabel>Name</FormLabel>
                 <FormControl>
-                  <Input placeholder="Input your name" {...field} />
+                  <Input placeholder="Input your Name" {...field} />
                 </FormControl>
                 <FormMessage />
               </FormItem>
@@ -128,7 +174,7 @@ const RecipeForm = ({ type, payload }: IRecipeForm) => {
               <FormItem>
                 <FormLabel>Email</FormLabel>
                 <FormControl>
-                  <Input type="email" placeholder="Input your email" {...field} />
+                  <Input type="email" placeholder="Input your Email" {...field} />
                 </FormControl>
                 <FormMessage />
               </FormItem>
@@ -141,7 +187,7 @@ const RecipeForm = ({ type, payload }: IRecipeForm) => {
               <FormItem>
                 <FormLabel>Title</FormLabel>
                 <FormControl>
-                  <Input placeholder="Input your title" {...field} />
+                  <Input placeholder="Input your Title" {...field} readOnly={!!payload} />
                 </FormControl>
                 <FormMessage />
               </FormItem>
@@ -154,13 +200,17 @@ const RecipeForm = ({ type, payload }: IRecipeForm) => {
               <FormItem>
                 <FormLabel>Instructions</FormLabel>
                 <FormControl>
-                  <Textarea placeholder="Type your instructions here!" {...field} />
+                  <Textarea rows={6} placeholder="Type your instructions here!" {...field} />
                 </FormControl>
                 <FormMessage />
               </FormItem>
             )}
           />
-          <Button type="submit" className="w-fit text-right cursor-pointer">Submit</Button>
+          <div className="flex justify-end items-center gap-4">
+            {payload && <Button type="button" variant="destructive" onClick={handleDelte} className="w-fit text-right cursor-pointer">Delete</Button>}
+            <Button type="submit" className="w-fit text-right cursor-pointer">Save</Button>
+          </div>
+          <Input type="hidden" {...form.register('id')} />
         </div>
       </form>
     </Form >

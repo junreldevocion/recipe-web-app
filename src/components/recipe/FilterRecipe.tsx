@@ -27,7 +27,7 @@ const FilterRecipe = () => {
       <h2 className="text-xl font-bold mb-4">Filter</h2>
       <h3 className='text-sm'>Favorites</h3>
       <div className="flex items-center space-x-2 pt-4">
-        <Checkbox id="yes" onCheckedChange={(e: boolean) => handleFavorites(e, 'YES')} />
+        <Checkbox className="cursor-pointer" id="yes" onCheckedChange={(e: boolean) => handleFavorites(e, 'YES')} />
         <label
           htmlFor="terms"
           className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
@@ -36,7 +36,7 @@ const FilterRecipe = () => {
         </label>
       </div>
       <div className="flex items-center space-x-2 pt-4">
-        <Checkbox id="no" onCheckedChange={(e: boolean) => handleFavorites(e, 'NO')} />
+        <Checkbox className="cursor-pointer" id="no" onCheckedChange={(e: boolean) => handleFavorites(e, 'NO')} />
         <label
           htmlFor="terms"
           className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"

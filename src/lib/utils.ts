@@ -22,3 +22,14 @@ export const debounce = (func: (...args: string[]) => void, wait: number) => {
     timeout = setTimeout(() => func(...args), wait);
   };
 };
+
+export const blobUrlToFile = (blobUrl: string, fileName: string): Promise<File> => new Promise((resolve) => {
+  fetch(blobUrl).then((res) => {
+    res.blob().then((blob) => {
+      // please change the file.extension with something more meaningful
+      // or create a utility function to parse from URL
+      const file = new File([blob], fileName, { type: blob.type })
+      resolve(file)
+    })
+  })
+})

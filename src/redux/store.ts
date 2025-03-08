@@ -4,7 +4,7 @@ import { RecipeSlice } from './recipe/recipe.slice';
 
 export const store = configureStore({
   reducer: {
-    recipe: RecipeSlice.reducer
+    recipe: RecipeSlice.reducer,
   },
   middleware: (getDefaultMiddleware) => getDefaultMiddleware({
     serializableCheck: false,

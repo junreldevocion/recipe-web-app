@@ -1,7 +1,7 @@
 export interface Recipe {
   id: number;
-  name: 'John doe'
-  imageName: string;
+  name: 'string';
+  imageUrl: string;
   email: string;
   title: string;
   instructions: string;

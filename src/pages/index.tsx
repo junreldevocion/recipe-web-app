@@ -5,7 +5,7 @@ import Sidebar from "@/components/Sidebar";
 import { Button } from "@/components/ui/button";
 import { getRecipies } from "@/redux/recipe/recipe.slice";
 import { useAppDispatch, useAppSelectore } from "@/redux/store";
-import { Plus } from "lucide-react";
+import { Plus, RefreshCcw } from "lucide-react";
 import Link from "next/link";
 import { useEffect } from "react";
 
@@ -30,21 +30,21 @@ export default function Home() {
           </Link>
           {(recipies ?? []).length <= 0 && (
             <>
-              <div className="flex items-center justify-center w-full h-full border-2 border-muted">
+              <div className="flex items-center justify-center w-full h-full border-2 border-muted flex-col">
                 <h1 className="text-4xl font-extrabold">No Record Found!</h1>
+                <Button className="cursor-pointer" onClick={() => dispatch(getRecipies())}><RefreshCcw /></Button>
               </div>
             </>
           )}
-          <div className="p-4 flex flex-col gap-4 overflow-y-scroll w-full h-full border-2 border-muted">
-            {
-              (recipies ?? [])?.map((item) => {
-                const { id } = item
-                return <Link key={id} href={`/recipe/${item.id}`}>
-                  <RecipeList {...item} />
-                </Link>
-              })
-            }
-          </div>
+          {(recipies ?? []).length > 0 && (
+            <div className="p-4 flex flex-col gap-4 overflow-y-scroll w-full h-full border-2 border-muted">
+              {
+                (recipies ?? [])?.map((item) => {
+                  const { id } = item
+                  return <RecipeList key={id} {...item} />
+                })
+              }
+            </div>)}
         </main>
       </div>
     </>
